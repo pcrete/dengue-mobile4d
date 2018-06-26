@@ -1,48 +1,80 @@
 from flask import Flask, jsonify, request, abort
 from flask import redirect, url_for, send_from_directory
 from flask import render_template
+from flask_cors import CORS, cross_origin
 from flask_nav import Nav
 from flask_nav.elements import *
 
 from werkzeug.utils import secure_filename
+from uuid import uuid4
 import json, os
 
-UPLOAD_FOLDER = os.path.join('static','images')
+UPLOAD_FOLDER = os.path.join('static','uploads')
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 app = Flask(__name__)
+CORS(app)
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.secret_key = 'A0Zr98j/3yX~XH~!DENGUE~!jmN]LWX/,?RT/MOBILE4D'
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/upload/images/', methods=['POST'])
 def upload_file():
+    json_respond = {}
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit a empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('uploaded_file',
-                                    filename=filename))
-    return render_template('upload.html')
+            json_respond['status'] = 'error'
+            json_respond['message'] = 'No file part'
+            return jsonify(json_respond)
 
+        print(request.files)
 
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'],
-                               filename)
+        # Create a unique "session ID" for this particular batch of uploads.
+        upload_key = str(uuid4())
+        target = os.path.join(app.config['UPLOAD_FOLDER'], upload_key)
+        try:
+            os.mkdir(target)
+        except:
+            json_respond['status'] = 'error'
+            json_respond['message'] = 'Couldn\'t create upload directory: {}'.format(target)
+            return jsonify(json_respond)
 
+        for upload in request.files.getlist("file"):
+            filename = secure_filename(upload.filename.rsplit("/")[0])
+
+            # if user does not select file, browser also
+            # submit a empty part without filename
+            if filename == '':
+                json_respond['status'] = 'error'
+                json_respond['message'] = 'No selected file'
+                return jsonify(json_respond)
+
+            if upload and allowed_file(filename):
+
+                destination = os.path.join(target, filename)
+                upload.save(destination)
+
+                print("Accept incoming file:", filename)
+                print("Save it to:", destination)
+
+            else:
+                json_respond['status'] = 'error'
+                json_respond['message'] = 'Not allowed file.'
+                return jsonify(json_respond)
+
+        json_respond['status'] = 'success'
+        json_respond['message'] = 'The images have been uploaded.'
+        return jsonify(json_respond)
+
+    else:
+        json_respond['status'] = 'error'
+        json_respond['message'] = 'Request method != POST'
+        return jsonify(json_respond)
 
 @app.route('/hello/')
 @app.route('/hello/<name>')
