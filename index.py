@@ -18,6 +18,33 @@ CORS(app)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.secret_key = 'A0Zr98j/3yX~XH~!DENGUE~!jmN]LWX/,?RT/MOBILE4D'
 
+'''
+1. Request missing streets
+'''
+
+@app.route('/get/jobs/', methods=['POST'])
+def get_jobs():
+    json_respond = {}
+    if request.method == 'POST':
+        data = request.json
+        if data['geometry']['type'] != 'Point':
+            json_respond['status'] = 'error'
+            json_respond['message'] = 'Not a point geometry'
+
+        lat, lng = data['geometry']['coordinates']
+
+
+    else:
+        json_respond['status'] = 'error'
+        json_respond['message'] = 'Request method != POST'
+        return jsonify(json_respond)
+
+
+
+'''
+2. Submit photos to the server
+'''
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -81,11 +108,14 @@ def upload_file():
 def hello(name=None):
     return render_template('hello.html', name=name)
 
+
 @app.route('/foo', methods=['GET','POST'])
 def foo():
     data = request.json
     data['respond'] = 'yes'
     return json.dumps(data)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

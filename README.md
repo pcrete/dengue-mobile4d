@@ -28,24 +28,14 @@ pip3 install -r requirements.txt
 python3 index.py
 ```
 ### Test request
-* Linux users
 ```
-curl --header "Content-Type: application/json" \
---request POST \
---data '{"send":"okay"}' \
-http://localhost:5000/foo
-
-```
-
-* Windows users
-```
-curl -H "Content-Type: application/json" -X POST http://localhost:5000/foo -d "{\"send\":\"okay\"}"
+curl -H "Content-Type: application/json" -X POST -d "{\"send\":\"okay\"}" http://localhost:5000/foo 
 ```
 
 ## API Reference
 
-### Request missing streets
-Send current location of the users
+### 1. Request missing streets
+* Send current location of the users
 ```json
 {
   "type": "Feature",
@@ -60,8 +50,23 @@ Send current location of the users
   }
 }
 ```
+### 2. Receive jobs
 
-### Submit photos
+
+```json
+{
+  "status": "success",
+  "message": ""
+}
+```
+
+```json
+{
+	"status": "error",
+	"message": "No missing streets found"
+}
+```
+### 3. Submit photos
 * Sample JSON request (sending images to the server)
 ```json
 curl \
@@ -74,19 +79,23 @@ curl \
 * Sample JSON respond from the server
 ```json
 {
-  "message": "The images have been uploaded.", 
-  "status": "success"
+  "status": "success",
+  "message": "The images have been uploaded."
 }
 
 ```
 
+
 * Sample output on the server
-```console
+```
 ImmutableMultiDict([('file', <FileStorage: '1.jpg' ('image/jpeg')>), ('file', <FileStorage: '2.jpg' ('image/jpeg')>)])
+
 Accept incoming file: 1.jpg
 Save it to: static/uploads/7901bcd5-2d5a-4e2e-9e48-de89c4d18e28/1.jpg
+
 Accept incoming file: 2.jpg
 Save it to: static/uploads/7901bcd5-2d5a-4e2e-9e48-de89c4d18e28/2.jpg
+
 127.0.0.1 - - [27/Jun/2018 00:04:49] "POST /upload/images/ HTTP/1.1" 200 -
 
 ```
