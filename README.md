@@ -29,27 +29,33 @@ python3 index.py
 ```
 ### Test request
 ```
-curl -H "Content-Type: application/json" -X POST -d "{\"send\":\"okay\"}" http://localhost:5000/foo 
+curl -H "Content-Type: application/json" -X POST -d '{"send":"okay"}' http://localhost:5000/foo 
 ```
 
 ## API Reference
 
 ### 1. Request missing streets
-* Send current location of the users
-```json
-{
+* Sample JSON request - Send current location of the users
+* 
+```
+curl -H "Content-Type: application/json" \
+-X POST \
+-d '{
   "type": "Feature",
   "geometry": {
     "type": "Point",
-    "coordinates": [99.8, 8.1]
+    "coordinates": [100.135, 8.351]
   },
   "properties": {
 	"province": "Nakhon Si Thammarat",
-	"district": "Phrom Khiri",
-	"subdistrict": "Thon Hong"
+	"district": "Pak Phanang",
+	"subdistrict": "Khlong Krabue",
+	"radius": 1000
   }
-}
+}' \
+ http://localhost:5000/get/jobs/
 ```
+
 ### 2. Receive jobs
 
 
