@@ -99,7 +99,7 @@ def upload_file():
     if request.method == 'POST':
 
         # check if the post request has the file part
-        if 'file' not in request.files:
+        if 'fil'e not in request.files:
             json_respond['status'] = 'error'
             json_respond['message'] = 'No file part'
             print(json_respond)

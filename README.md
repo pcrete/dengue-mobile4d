@@ -36,7 +36,6 @@ curl -H "Content-Type: application/json" -X POST -d '{"send":"okay"}' http://loc
 
 ### 1. Request missing streets
 * Sample JSON request - Send current location of the users
-* 
 ```
 curl -H "Content-Type: application/json" \
 -X POST \
