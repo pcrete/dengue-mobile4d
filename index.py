@@ -102,6 +102,7 @@ def upload_file():
         if 'file' not in request.files:
             json_respond['status'] = 'error'
             json_respond['message'] = 'No file part'
+            print(json_respond)
             return jsonify(json_respond)
 
         print(request.files)
@@ -114,6 +115,7 @@ def upload_file():
         except:
             json_respond['status'] = 'error'
             json_respond['message'] = 'Couldn\'t create upload directory: {}'.format(target)
+            print(json_respond)
             return jsonify(json_respond)
 
         for upload in request.files.getlist("file"):
@@ -124,6 +126,7 @@ def upload_file():
             if filename == '':
                 json_respond['status'] = 'error'
                 json_respond['message'] = 'No selected file'
+                print(json_respond)
                 return jsonify(json_respond)
 
             if upload and allowed_file(filename):
@@ -137,6 +140,7 @@ def upload_file():
             else:
                 json_respond['status'] = 'error'
                 json_respond['message'] = 'Not allowed file.'
+                print(json_respond)
                 return jsonify(json_respond)
 
         # Success
@@ -160,9 +164,9 @@ def hello(name=None):
 @app.route('/foo/', methods=['GET','POST'])
 def foo():
     data = request.json
-    data['respond'] = 'yes'
     print(data)
     return json.dumps(data)
+
 '''
 =========================================================
 '''
