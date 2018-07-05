@@ -49,7 +49,7 @@ with open(
 1. Request missing streets =========================================
 '''
 
-@app.route('/dengue/get/jobs', methods=['POST'])
+@app.route('/dengue/get/jobs/', methods=['POST'])
 def get_jobs():
 	json_respond = {}
 	if request.method == 'POST':
