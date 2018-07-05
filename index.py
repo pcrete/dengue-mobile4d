@@ -121,7 +121,6 @@ def get_image_urls():
 
 		for ind, image_url in enumerate(data['properties']['image_urls']):
 			try:
-				print(image_url)
 				resource = urllib.request.urlopen(image_url)
 				destination = os.path.join(target, str(lat)+"_"+str(lng)+'_'+str(ind)+".jpg")
 				output = open(destination,"wb")
