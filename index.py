@@ -48,7 +48,7 @@ with open(
 1. Request missing streets =========================================
 '''
 
-@app.route('/get/jobs/', methods=['POST'])
+@app.route('/dengue/get/jobs/', methods=['POST'])
 def get_jobs():
     json_respond = {}
     if request.method == 'POST':
@@ -91,15 +91,16 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/upload/images/', methods=['POST'])
+@app.route('/dengue/upload/images/', methods=['POST'])
 def upload_file():
     json_respond = {}
 
     # check if it is POST method
     if request.method == 'POST':
-
+        print()
         # check if the post request has the file part
-        if 'fil'e not in request.files:
+        print(request.files)
+        if 'file' not in request.files:
             json_respond['status'] = 'error'
             json_respond['message'] = 'No file part'
             print(json_respond)
@@ -118,6 +119,8 @@ def upload_file():
             print(json_respond)
             return jsonify(json_respond)
 
+        print(request.json)
+
         for upload in request.files.getlist("file"):
             filename = secure_filename(upload.filename.rsplit("/")[0])
 
@@ -129,19 +132,13 @@ def upload_file():
                 print(json_respond)
                 return jsonify(json_respond)
 
-            if upload and allowed_file(filename):
+            destination = os.path.join(target, filename)
+            upload.save(destination)
 
-                destination = os.path.join(target, filename)
-                upload.save(destination)
+            print("Accept incoming file:", filename)
+            print("Save it to:", destination)
 
-                print("Accept incoming file:", filename)
-                print("Save it to:", destination)
 
-            else:
-                json_respond['status'] = 'error'
-                json_respond['message'] = 'Not allowed file.'
-                print(json_respond)
-                return jsonify(json_respond)
 
         # Success
         json_respond['status'] = 'success'
@@ -156,15 +153,15 @@ def upload_file():
 '''
 ==================== Test API ===========================
 '''
-@app.route('/hello/')
-@app.route('/hello/<name>')
+@app.route('/dengue/hello/')
+@app.route('/dengue/hello/<name>')
 def hello(name=None):
     return render_template('hello.html', name=name)
 
-@app.route('/foo/', methods=['GET','POST'])
+@app.route('/dengue/foo/', methods=['GET','POST'])
 def foo():
     data = request.json
-    print(data)
+    data['message'] = 'Hey'
     return json.dumps(data)
 
 '''
@@ -172,4 +169,4 @@ def foo():
 '''
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5001)
