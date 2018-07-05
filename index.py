@@ -7,6 +7,7 @@ $ python3 index.py
 '''
 import json
 import os
+import urllib
 
 from flask import Flask, jsonify, request, abort
 from flask import redirect, url_for, send_from_directory
@@ -82,6 +83,45 @@ def get_jobs():
         json_respond['message'] = 'Request method != POST'
         return jsonify(json_respond)
 
+'''
+2. Submit image urls to the server  =========================================
+'''
+
+@app.route('/dengue/send/urls/', methods=['POST'])
+def get_image_urls():
+    json_respond = {}
+    if request.method == 'POST':
+        data = request.json
+        print(data)
+        if data['geometry']['type'] != 'Point':
+            json_respond['status'] = 'error'
+            json_respond['message'] = 'Not a point geometry'
+            return jsonify(json_respond)
+
+        lng, lat = data['geometry']['coordinates']
+
+        # Create a unique "session ID" for this particular batch of uploads.
+        upload_key = str(uuid4())
+        target = os.path.join(app.config['UPLOAD_FOLDER'], upload_key)
+        try:
+            os.mkdir(target)
+        except:
+            json_respond['status'] = 'error'
+            json_respond['message'] = 'Couldn\'t create upload directory: {}'.format(target)
+            print(json_respond)
+            return jsonify(json_respond)
+
+        for ind, image_url in enumerate(data['properties']['image_urls']):
+            print(image_url)
+            resource = urllib.request.urlopen(image_url)
+            destination = os.path.join(target, str(lat)+"_"+str(lng)+'_'+str(ind)+".jpg")
+            output = open(destination,"wb")
+            output.write(resource.read())
+            output.close()
+
+        json_respond['status'] = 'success'
+        json_respond['message'] = 'The images have been uploaded.'
+        return jsonify(json_respond)
 
 '''
 2. Submit photos to the server ======================================
