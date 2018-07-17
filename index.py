@@ -8,6 +8,7 @@ $ python3 index.py
 import json
 import os
 import urllib
+import base64
 
 from flask import Flask, jsonify, request, abort
 from flask import redirect, url_for, send_from_directory
@@ -137,8 +138,60 @@ def get_image_urls():
         print(json_respond)
         return jsonify(json_respond)
 
+
 '''
-2.2 Submit photos to the server ======================================
+2.2 Submit base64 images to the server  =========================================
+'''
+
+@app.route('/dengue/send/base64/', methods=['POST'])
+def get_encoded_images():
+    json_respond = {}
+    if request.method == 'POST':
+        data = request.json
+        if data['geometry']['type'] != 'Point':
+            json_respond['status'] = 'error'
+            json_respond['message'] = 'Not a point geometry'
+            print(json_respond)
+            return jsonify(json_respond)
+
+        lng, lat = data['geometry']['coordinates']
+
+        # Create a unique "session ID" for this particular batch of uploads.
+        upload_key = str(uuid4())
+        target = os.path.join(app.config['UPLOAD_FOLDER'], upload_key)
+        try:
+            os.mkdir(target)
+        except:
+            json_respond['status'] = 'error'
+            json_respond['message'] = 'Couldn\'t create upload directory: {}'.format(target)
+            print(json_respond)
+            return jsonify(json_respond)
+
+        if len(data['properties']['base64_images']) == 0:
+            json_respond['status'] = 'error'
+            json_respond['message'] = 'Empty image url'
+            print(json_respond)
+            return jsonify(json_respond)
+
+        for ind, base64_image in enumerate(data['properties']['base64_images']):
+            try:
+
+                with open(destination, 'wb') as fh:
+                    fh.write(base64.decodebytes(base64_image))
+
+            except:
+                json_respond['status'] = 'error'
+                json_respond['message'] = 'Couldn\'t create upload directory: {}'.format(target)
+                print(json_respond)
+                return jsonify(json_respond)
+
+        json_respond['status'] = 'success'
+        json_respond['message'] = 'The images have been uploaded.'
+        print(json_respond)
+        return jsonify(json_respond)
+
+'''
+2.3 Submit photos to the server ======================================
 '''
 
 def allowed_file(filename):
