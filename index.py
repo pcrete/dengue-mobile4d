@@ -175,13 +175,12 @@ def get_encoded_images():
 
         for ind, base64_image in enumerate(data['properties']['base64_images']):
             try:
-
                 with open(destination, 'wb') as fh:
                     fh.write(base64.decodebytes(base64_image))
 
             except:
                 json_respond['status'] = 'error'
-                json_respond['message'] = 'Couldn\'t create upload directory: {}'.format(target)
+                json_respond['message'] = 'Couldn\'t save image to directory: {}'.format(target)
                 print(json_respond)
                 return jsonify(json_respond)
 
