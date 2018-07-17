@@ -175,6 +175,8 @@ def get_encoded_images():
 
         for ind, base64_image in enumerate(data['properties']['base64_images']):
             try:
+
+                destination = os.path.join(target, str(lat)+"_"+str(lng)+'_'+str(ind)+".jpg")
                 with open(destination, 'wb') as fh:
                     fh.write(base64.b64decode(base64_image))
 
