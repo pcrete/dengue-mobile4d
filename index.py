@@ -176,7 +176,7 @@ def get_encoded_images():
         for ind, base64_image in enumerate(data['properties']['base64_images']):
             try:
                 with open(destination, 'wb') as fh:
-                    fh.write(base64.decodebytes(base64_image))
+                    fh.write(base64.b64decode(base64_image))
 
             except:
                 json_respond['status'] = 'error'
