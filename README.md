@@ -72,6 +72,7 @@ curl -H "Content-Type: application/json" \
 }
 ```
 ### 3. Submit photos
+#### 3.1 Uncoded Image
 * Sample JSON request (sending images to the server)
 ```json
 curl \
@@ -89,6 +90,8 @@ curl \
 }
 
 ```
+
+#### 3.2 By URL
 
 
 * Sample output on the server

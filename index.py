@@ -141,66 +141,66 @@ def get_image_urls():
 2.2 Submit photos to the server ======================================
 '''
 
-# def allowed_file(filename):
-#       return '.' in filename and \
-#                    filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+def allowed_file(filename):
+      return '.' in filename and \
+                   filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# @app.route('/dengue/upload/images/', methods=['POST'])
-# def upload_file():
-#   json_respond = {}
+@app.route('/dengue/upload/images/', methods=['POST'])
+def upload_file():
+  json_respond = {}
 
-#   # check if it is POST method
-#   if request.method == 'POST':
-#       print()
-#       # check if the post request has the file part
-#       print(request.files)
-#       if 'file' not in request.files:
-#           json_respond['status'] = 'error'
-#           json_respond['message'] = 'No file part'
-#           print(json_respond)
-#           return jsonify(json_respond)
+  # check if it is POST method
+  if request.method == 'POST':
+      print()
+      # check if the post request has the file part
+      print(request.files)
+      if 'file' not in request.files:
+          json_respond['status'] = 'error'
+          json_respond['message'] = 'No file part'
+          print(json_respond)
+          return jsonify(json_respond)
 
-#       print(request.files)
+      print(request.files)
 
-#       # Create a unique "session ID" for this particular batch of uploads.
-#       upload_key = str(uuid4())
-#       target = os.path.join(app.config['UPLOAD_FOLDER'], upload_key)
-#       try:
-#           os.mkdir(target)
-#       except:
-#           json_respond['status'] = 'error'
-#           json_respond['message'] = 'Couldn\'t create upload directory: {}'.format(target)
-#           print(json_respond)
-#           return jsonify(json_respond)
+      # Create a unique "session ID" for this particular batch of uploads.
+      upload_key = str(uuid4())
+      target = os.path.join(app.config['UPLOAD_FOLDER'], upload_key)
+      try:
+          os.mkdir(target)
+      except:
+          json_respond['status'] = 'error'
+          json_respond['message'] = 'Couldn\'t create upload directory: {}'.format(target)
+          print(json_respond)
+          return jsonify(json_respond)
 
-#       print(request.json)
+      print(request.json)
 
-#       for upload in request.files.getlist("file"):
-#           filename = secure_filename(upload.filename.rsplit("/")[0])
+      for upload in request.files.getlist("file"):
+          filename = secure_filename(upload.filename.rsplit("/")[0])
 
-#           # if user does not select file, browser also
-#           # submit a empty part without filename
-#           if filename == '':
-#               json_respond['status'] = 'error'
-#               json_respond['message'] = 'No selected file'
-#               print(json_respond)
-#               return jsonify(json_respond)
+          # if user does not select file, browser also
+          # submit a empty part without filename
+          if filename == '':
+              json_respond['status'] = 'error'
+              json_respond['message'] = 'No selected file'
+              print(json_respond)
+              return jsonify(json_respond)
 
-#           destination = os.path.join(target, filename)
-#           upload.save(destination)
+          destination = os.path.join(target, filename)
+          upload.save(destination)
 
-#           print("Accept incoming file:", filename)
-#           print("Save it to:", destination)
+          print("Accept incoming file:", filename)
+          print("Save it to:", destination)
 
-#       # Success
-#       json_respond['status'] = 'success'
-#       json_respond['message'] = 'The images have been uploaded.'
-#       return jsonify(json_respond)
+      # Success
+      json_respond['status'] = 'success'
+      json_respond['message'] = 'The images have been uploaded.'
+      return jsonify(json_respond)
 
-#   else:
-#       json_respond['status'] = 'error'
-#       json_respond['message'] = 'Request method != POST'
-#       return jsonify(json_respond)
+  else:
+      json_respond['status'] = 'error'
+      json_respond['message'] = 'Request method != POST'
+      return jsonify(json_respond)
 
 '''
 ==================== Test API ===========================
