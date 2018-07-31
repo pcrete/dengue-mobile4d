@@ -9,6 +9,9 @@ import json
 import os
 import urllib
 import base64
+import csv
+import re
+import pandas as pd
 
 from flask import Flask, jsonify, request, abort
 from flask import redirect, url_for, send_from_directory
@@ -16,12 +19,14 @@ from flask import render_template
 from flask_cors import CORS, cross_origin
 from flask_nav import Nav
 from flask_nav.elements import *
+from shapely.geometry import Polygon, Point, LineString, MultiLineString
 
 from werkzeug.utils import secure_filename
 from uuid import uuid4
 from copy import deepcopy
 
 from modules import gsvradar
+from modules import missingboxradar
 
 '''
 0. Initialization =================================================
@@ -45,7 +50,30 @@ with open(
         'Nakhon-Si-Thammarat-missing-streets.geojson')
     ) as data_file:
     missing_streets = json.load(data_file)
+    
+#import csv dengue-case
+denguecase = pd.read_csv(os.path.join('static','dengue-cases','dengue-cases.csv'))
+denguecase['addrcode'] = denguecase['addrcode'].astype(str)
+    
+#import Nakhon in subdistrict Shapefile
+with open(
+    os.path.join(
+        'static',
+        'dengue-cases',
+        'Nakhon-subdistricts.geojson')
+    ) as subdistrict_file:
+    NakhonSubdistrict = json.load(subdistrict_file)
 
+#import Nakhon in missing point shapefile
+with open(
+    os.path.join(
+        'static',
+        'missing-boxes',
+        'Nakhon-Si-Thammarat-missing-boxes.geojson')
+    ) as missingboxes_file:
+    Nakhonmissingboxes = json.load(missingboxes_file)
+    
+    
 '''
 1. Request missing streets =========================================
 '''
@@ -255,6 +283,73 @@ def upload_file():
       json_respond['status'] = 'error'
       json_respond['message'] = 'Request method != POST'
       return jsonify(json_respond)
+
+    
+
+@app.route('/dengue/get/cases/', methods=['GET','POST'])
+def dengue_cases():
+    json_respond = {}
+    
+    data = request.json
+    
+    lng, lat = data['geometry']['coordinates']
+    level = data['properties']['level']
+    
+    point = Point(lng,lat)
+    TB_ID = 0
+    AP_ID = 0
+    totalPolygon = len(NakhonSubdistrict['features'])
+    
+    for i, feature in enumerate(NakhonSubdistrict['features']):
+        poly = Polygon(NakhonSubdistrict['features'][i]['geometry']['coordinates'][0])
+        if(poly.contains(point)):
+            TB_ID = feature['properties']['TB_IDN']
+            AP_ID = feature['properties']['AP_IDN']
+            break
+        elif i == totalPolygon - 1 :
+            json_respond['status'] = 'error'
+            json_respond['message'] = "The input point is invalid in the specific area"
+            return jsonify(json_respond)
+            break
+    if level == 'subdistrict':
+        subdist_count = denguecase.loc[denguecase['addrcode']== TB_ID]['cases'].sum()
+        json_respond['status'] = 'success'
+        json_respond['message'] = 'totalcases = '+str(subdist_count)
+        json_respond['level'] = level
+        return jsonify(json_respond)
+    elif level == 'district':
+        district_count = denguecase.loc[denguecase['addrcode'].str[:4]== AP_ID]['cases'].sum()
+        json_respond['status'] = 'success'
+        json_respond['message'] = 'totalcases = '+str(district_count)
+        json_respond['level'] = level
+        return jsonify(json_respond)
+    
+    
+@app.route('/dengue/get/missing-boxes/', methods=['GET','POST'])
+def dengue_get_missingboxes():
+    json_respond = {}
+    
+    data = request.json
+    
+    lng, lat = data['geometry']['coordinates']
+    
+    target_streets = missingboxradar.by_radius(
+    target_streets=deepcopy(Nakhonmissingboxes),
+    lat=lat,
+    lng=lng,
+    radius=data['properties']['radius'],
+    )
+    
+    if len(target_streets['features']) == 0:
+        json_respond['status'] = 'error'
+        json_respond['message'] = 'No missing-points found in the radius'
+        return jsonify(json_respond)
+    else:
+        json_respond['status'] = 'success'
+        json_respond['message'] = 'Missing-points found'
+        print(json_respond)
+        json_respond['data'] = target_streets
+        return jsonify(json_respond)
 
 '''
 ==================== Test API ===========================
